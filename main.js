@@ -86,7 +86,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                         const windArrow = getWindArrow(data.wind.deg);
                         const windIcon = L.divIcon({ className: 'wind-label', html: `<b>${windArrow}</b> ${windSpeed} km/u` });
                         L.marker([city.lat, city.lon], { icon: windIcon }).addTo(windLayer);
-                    }).catch(() => {});
+                    })
+                    .catch(error => {
+                        console.error(`Fout bij ophalen van OpenWeather data voor ${city.name}:`, error);
+                    });
 
                 // 2. Haal UV Index op van OpenUV
                 fetch(`https://api.openuv.io/api/v1/uv?lat=${city.lat}&lng=${city.lon}`, {
@@ -99,7 +102,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                         const uvClass = getUvClass(data.result.uv);
                         const uvIcon = L.divIcon({ className: `uv-label ${uvClass}`, html: `<b>${uvValue}</b>` });
                         L.marker([city.lat, city.lon], { icon: uvIcon }).addTo(uvLayer);
-                    }).catch(() => {});
+                    })
+                    .catch(error => {
+                        console.error(`Fout bij ophalen van OpenUV data voor ${city.name}:`, error);
+                    });
             });
         } catch (error) {
             loader.innerText = 'Fout: Kon capitals.json niet laden.';
