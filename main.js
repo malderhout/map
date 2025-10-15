@@ -1,3 +1,5 @@
+import 'leaflet-terminator'; // <-- NIEUW: Voeg deze regel bovenaan toe
+
 document.addEventListener('DOMContentLoaded', async function () {
     const loader = document.getElementById('loader');
     
