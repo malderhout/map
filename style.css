@@ -31,7 +31,9 @@ body, html {
     font-size: 14px;
     font-weight: bold;
     color: white;
-    text-shadow: 0 0 3px black, 0 0 5px black;
+    text-shadow: 
+        0 0 3px black, 
+        0 0 5px black;
     text-align: center;
     min-width: 70px;
     padding: 5px;
@@ -43,7 +45,7 @@ body, html {
     vertical-align: middle;
 }
 
-/* --- Nieuwe stijl voor de UV Index labels --- */
+/* --- Stijl voor de UV Index labels --- */
 .uv-label {
     border-radius: 50%; /* Maakt het label rond */
     width: 32px;
