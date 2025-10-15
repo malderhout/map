@@ -1,45 +1,47 @@
-window.addEventListener('DOMContentLoaded', async function () {
+// Helper function to load a script dynamically and return a promise
+function loadScript(url) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// Main application logic, wrapped in an async function
+async function main() {
+    // First, await the loading of the plugin. This guarantees it's ready.
+    await loadScript('https://cdn.jsdelivr.net/npm/leaflet-terminator/L.Terminator.js');
+
+    // Now that the plugin is loaded, the rest of the application can run safely.
     const loader = document.getElementById('loader');
     
-    // API-sleutels veilig inladen vanuit de omgevingsvariabelen
     const apiKey_OpenWeather = import.meta.env.VITE_API_KEY_OPENWEATHER;
     const apiKey_OpenUV = import.meta.env.VITE_API_KEY_OPENUV;
 
     if (!apiKey_OpenWeather || !apiKey_OpenUV) {
-        alert('API sleutels zijn niet correct geladen. Controleer de omgevingsvariabelen op je hostingplatform.');
+        alert('API sleutels zijn niet correct geladen. Controleer de omgevingsvariabelen.');
     }
 
-    // --- BASISKAARTEN ---
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
 
-    // --- KAART INITIALISATIE ---
     const map = L.map('map', { center: [20, 0], zoom: 2, layers: [satelliteLayer] });
 
-    // --- HULPFUNCTIES ---
-    function getWindArrow(degrees) { /* ... ongewijzigd ... */ }
-    function getUvClass(uvi) { /* ... ongewijzigd ... */ }
+    // This line will now work without errors
+    const dayNightLayer = L.terminator();
 
-    // --- 🌧️ GEANIMEERDE REGENRADAR ---
+    // The rest of your application code remains the same...
     const rainLayerGroup = L.layerGroup();
-    // ... de volledige radar-code blijft ongewijzigd ...
-
-    // --- ANDERE WEER-OVERLAYS ---
     const cloudsLayer = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${apiKey_OpenWeather}`, { opacity: 0.8 });
     const windLayer = L.layerGroup();
     const tempLayer = L.layerGroup();
     const uvLayer = L.layerGroup();
-    
-    // NIEUW: Maak de dag/nacht-laag aan
-    const dayNightLayer = L.terminator();
 
-    // --- DATA OPHALEN ---
-    // ... de volledige data-ophalen code blijft ongewijzigd ...
-    
-    // --- LAYER CONTROL ---
     const baseMaps = { "Standaard Kaart": osmLayer, "Satelliet": satelliteLayer };
     const overlayMaps = {
-        "☀️ Dag & Nacht 🌑": dayNightLayer, // NIEUW: Hier toegevoegd
+        "☀️ Dag & Nacht 🌑": dayNightLayer,
         "🌧️ Regenradar (geanimeerd)": rainLayerGroup,
         "🌡️ Temperatuur": tempLayer,
         "💨 Wind": windLayer,
@@ -49,11 +51,21 @@ window.addEventListener('DOMContentLoaded', async function () {
 
     L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
 
-    // --- EVENT LISTENERS ---
-    // ... de volledige event-listener code blijft ongewijzigd ...
+    // --- All other functions (getWindArrow, getUvClass, radar setup, data fetching) remain unchanged ---
 
-    // --- Oude code voor de volledigheid ---
-    // (De functies hieronder zijn ingeklapt omdat ze niet veranderd zijn)
+    function getWindArrow(degrees) {
+        const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+        return arrows[Math.round(degrees / 45) % 8];
+    }
+    function getUvClass(uvi) {
+        const uviValue = Math.round(uvi);
+        if (uviValue <= 2) return 'uv-low';
+        if (uviValue <= 5) return 'uv-moderate';
+        if (uviValue <= 7) return 'uv-high';
+        if (uviValue <= 10) return 'uv-very-high';
+        return 'uv-extreme';
+    }
+    let radarFrames = [], radarTimer = null;
     async function setupAnimatedRadar() {
         try { const response = await fetch('https://api.rainviewer.com/public/weather-maps.json'); const data = await response.json(); radarFrames = data.radar.past.map(frame => L.tileLayer(`https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`, { opacity: 0, zIndex: frame.time })); } catch (error) { console.error("Kon regenradar data niet laden:", error); }
     }
@@ -63,4 +75,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     map.on('overlayadd', e => { if (e.layer === rainLayerGroup) { radarFrames.forEach(f => f.addTo(rainLayerGroup)); playRadarAnimation(); }});
     map.on('overlayremove', e => { if (e.layer === rainLayerGroup) { stopRadarAnimation(); rainLayerGroup.clearLayers(); }});
     setupAnimatedRadar();
-});
+}
+
+// Start the main application logic
+main();
