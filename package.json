@@ -8,9 +8,6 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "dependencies": {
-    "leaflet-terminator": "^0.0.1"
-  },
   "devDependencies": {
     "vite": "^5.0.0"
   }

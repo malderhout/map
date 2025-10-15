@@ -1,6 +1,4 @@
-import 'leaflet-terminator'; // <-- NIEUW: Voeg deze regel bovenaan toe
-
-document.addEventListener('DOMContentLoaded', async function () {
+window.addEventListener('DOMContentLoaded', async function () {
     const loader = document.getElementById('loader');
     
     // API-sleutels veilig inladen vanuit de omgevingsvariabelen
