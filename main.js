@@ -93,4 +93,35 @@ document.addEventListener('DOMContentLoaded', async function () {
                     headers: { 'x-access-token': apiKey_OpenUV }
                 })
                     .then(res => res.json())
-                    .then(data
+                    .then(data => {
+                        if (!data || !data.result) return;
+                        const uvValue = data.result.uv.toFixed(1);
+                        const uvClass = getUvClass(data.result.uv);
+                        const uvIcon = L.divIcon({ className: `uv-label ${uvClass}`, html: `<b>${uvValue}</b>` });
+                        L.marker([city.lat, city.lon], { icon: uvIcon }).addTo(uvLayer);
+                    }).catch(() => {});
+            });
+        } catch (error) {
+            loader.innerText = 'Fout: Kon capitals.json niet laden.';
+            console.error(error);
+        }
+    })();
+    
+    // --- LAYER CONTROL ---
+    const baseMaps = { "Standaard Kaart": osmLayer, "Satelliet": satelliteLayer };
+    const overlayMaps = {
+        "🌧️ Regenradar (geanimeerd)": rainLayerGroup,
+        "🌡️ Temperatuur": tempLayer,
+        "💨 Wind": windLayer,
+        "☀️ UV Index": uvLayer,
+        "☁️ Wolkendekking": cloudsLayer
+    };
+
+    L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+
+    // --- EVENT LISTENERS ---
+    map.on('overlayadd', e => { if (e.layer === rainLayerGroup) { radarFrames.forEach(f => f.addTo(rainLayerGroup)); playRadarAnimation(); }});
+    map.on('overlayremove', e => { if (e.layer === rainLayerGroup) { stopRadarAnimation(); rainLayerGroup.clearLayers(); }});
+
+    setupAnimatedRadar();
+});
