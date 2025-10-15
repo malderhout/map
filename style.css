@@ -23,32 +23,42 @@ body, html {
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
 }
 
-/* --- Stijl voor de 'zwevende' tekstlabels --- */
+/* --- Stijl voor de 'zwevende' tekstlabels (Temp & Wind) --- */
 .temp-label, .wind-label {
-    /* Verwijder achtergrond en randen */
     background: transparent;
     border: none;
     box-shadow: none;
-
-    /* Maak de tekst uniform en leesbaar */
     font-size: 14px;
     font-weight: bold;
     color: white;
-    /* Essentieel: voeg een schaduw toe voor de leesbaarheid */
-    text-shadow: 
-        0 0 3px black, 
-        0 0 5px black;
-
-    /* Zorg voor centrering */
+    text-shadow: 0 0 3px black, 0 0 5px black;
     text-align: center;
     min-width: 70px;
     padding: 5px;
     box-sizing: border-box;
 }
 
-/* --- Specifieke stijl voor de windpijl --- */
 .wind-label b {
     font-size: 16px;
     vertical-align: middle;
-    line-height: 1;
 }
+
+/* --- Nieuwe stijl voor de UV Index labels --- */
+.uv-label {
+    border-radius: 50%; /* Maakt het label rond */
+    width: 32px;
+    height: 32px;
+    line-height: 32px; /* Centreert tekst verticaal */
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid rgba(0,0,0,0.5);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* Kleurcodering voor UV Index */
+.uv-label.uv-low { background-color: #5cb85c; color: white; }
+.uv-label.uv-moderate { background-color: #f0ad4e; color: black; }
+.uv-label.uv-high { background-color: #d9534f; color: white; }
+.uv-label.uv-very-high { background-color: #A040A0; color: white; } /* Paars */
+.uv-label.uv-extreme { background-color: #602080; color: white; } /* Donkerpaars */
