@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const redis = require('redis');
 const path = require('path');
-// De 'node-fetch' bibliotheek is niet meer nodig en is verwijderd.
+const fs = require('fs'); // Voeg de 'fs' module toe voor bestandsbewerkingen
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,26 +43,26 @@ app.get('/', (req, res) => {
 
 // --- API ROUTES ---
 
-// Proxy-route voor WFS data om CORS te omzeilen
-app.get('/api/parkeervakken', async (req, res) => {
-    const wfsUrl = 'https://maps.amsterdam.nl/open_geodata/WFS?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=VBA_PARKEERVAK&outputFormat=application/json&srsName=EPSG:4326';
-    try {
-        // Gebruik de ingebouwde fetch van Node.js met een User-Agent header
-        const response = await fetch(wfsUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+// Route aangepast om lokaal GeoJSON-bestand te lezen
+app.get('/api/parkeervakken', (req, res) => {
+    const filePath = path.join(__dirname, 'parkeervakken.gjson');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading parkeervakken.gjson:', err);
+            // Stuur een duidelijke foutmelding als het bestand niet gevonden kan worden
+            if (err.code === 'ENOENT') {
+                return res.status(404).json({ message: 'File parkeervakken.gjson not found.' });
             }
-        });
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`WFS server responded with status: ${response.status}. Body: ${errorText}`);
+            return res.status(500).json({ message: 'Failed to read GeoJSON file.' });
         }
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        console.error('Error proxying WFS request:', error);
-        res.status(500).json({ message: 'Failed to fetch WFS data.' });
-    }
+        try {
+            // Verstuur de inhoud van het bestand als JSON
+            res.json(JSON.parse(data));
+        } catch (parseError) {
+            console.error('Error parsing parkeervakken.gjson:', parseError);
+            return res.status(500).json({ message: 'Invalid JSON in parkeervakken.gjson file.' });
+        }
+    });
 });
 
 
